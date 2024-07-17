@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Índice UV</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container large-container" id="temp">
+        <h1>Índice UV Actual</h1>
+        <div class="uv-index" id="uvIndex">Cargando...</div>
+        <div class="sensor-value" id="sensorValue">Cargando...</div>
+        <div class="status" id="status">Esperando datos...</div>
+        <div class="uv-message" id="uvMessage"></div>  
+    </div>
+
+    <div class="container large-container" id="predictionContainer">
+        <h1>Predecir Índice UV</h1>
+        <form id="predictionForm">
+            <label for="date">Fecha:</label>
+            <input type="date" id="date" name="date" required>
+            <label for="time">Hora:</label>
+            <input type="time" id="time" name="time" required>
+            <button type="submit">Predecir</button>
+        </form>
+        <div class="predicted-uv-index" id="predictedUvIndex">Ingresa fecha y hora para predecir.</div>
+    </div>
+    
+    <div class="container">
+        <h1>Últimos 10 Valores</h1>
+        <ul id="latestValuesList"></ul>
+    </div>
+
+    <script>
+        async function fetchUVIndex() {
+            try {
+                const response = await fetch('/get_latest_uv_index');
+                const data = await response.json();
+                const uvIndexElement = document.getElementById('uvIndex');
+                const containerElement = document.getElementById('temp');
+                const sensorValueElement = document.getElementById('sensorValue');
+                const statusElement = document.getElementById('status');
+                const uvMessageElement = document.getElementById('uvMessage'); 
+
+                if (data.uv_index !== null && data.sensor_value !== null) {
+                    uvIndexElement.textContent = data.uv_index;
+                    sensorValueElement.textContent = `Valor del sensor: ${data.sensor_value}`;
+
+                    let statusMessage = '';
+                    let uvMessage = ''; 
+                    const sensorValue = parseFloat(data.sensor_value);
+
+                     if (sensorValue >= 0 && sensorValue <= 819) {
+                        statusMessage = 'Bajo';
+                        containerElement.style.background = 'green';
+                        uvMessage = 'Riesgo bajo de exposición al sol.';
+                    } else if (sensorValue > 819 && sensorValue <= 1638) {
+                        statusMessage = 'Moderado';
+                        containerElement.style.background = '#f0e223';
+                        uvMessage = 'Riesgo moderado de exposición al sol. Aplicar factor de protección solar.';
+                    } else if (sensorValue > 1638 && sensorValue <= 2457) {
+                        statusMessage = 'Alto';
+                        containerElement.style.background = 'orange';
+                        uvMessage = 'Riesgo alto de exposición al sol. Aplicar factor de protección solar, uso de sombrero.';
+                    } else if (sensorValue > 2457 && sensorValue <= 3276) {
+                        statusMessage = 'Muy Alto';
+                        containerElement.style.background = 'red';
+                        uvMessage = 'Riesgo muy alto de daño por exposición al sol. Aplicar factor de protección solar, uso de sombrero y gafas con filtro UV-A y B.';
+                    } else if (sensorValue > 3276 && sensorValue <= 4095) {
+                        statusMessage = 'Extremo';
+                        containerElement.style.background = 'purple';
+                        uvMessage = 'Riesgo extremo de daño por exposición al sol. Aplicar factor de protección solar, uso de sombrero y gafas con filtro UV-A y B. Exposiciones al sol por un tiempo limitado';
+                    }
+
+                    statusElement.textContent = statusMessage;
+                    uvMessageElement.textContent = uvMessage;  
+                } else {
+                    uvIndexElement.textContent = 'No disponible';
+                    sensorValueElement.textContent = 'No disponible';
+                    statusElement.textContent = 'Sin datos recientes';
+                    uvMessageElement.textContent = '';  
+                }
+            } catch (error) {
+                console.error('Error al obtener el índice UV:', error);
+                document.getElementById('uvIndex').textContent = 'Error';
+                document.getElementById('sensorValue').textContent = 'Error';
+                document.getElementById('status').textContent = 'No se pudo obtener el índice UV';
+                document.getElementById('uvMessage').textContent = '';  
+            }
+        }
+
+        async function predictUVIndex(event) {
+            event.preventDefault();
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const predictionContainer = document.getElementById('predictionContainer');
+            try {
+                const response = await fetch(`/predict_uv_index?date=${date}&time=${time}`);
+                const data = await response.json();
+                const predictedUvIndexElement = document.getElementById('predictedUvIndex');
+
+                if (data.predicted_uv_index !== undefined) {
+                    const predictedUvIndex = parseFloat(data.predicted_uv_index);
+                    predictedUvIndexElement.textContent = `Predicted UV Index: ${predictedUvIndex}`;
+
+                     if (predictedUvIndex >= 0 && predictedUvIndex <= 2.9) {
+                        predictionContainer.style.background = 'green';
+                    } else if (predictedUvIndex > 2.9 && predictedUvIndex <= 5.9) {
+                        predictionContainer.style.background = '#f0e223';
+                    } else if (predictedUvIndex > 5.9 && predictedUvIndex <= 7.9) {
+                        predictionContainer.style.background = 'orange';
+                    } else if (predictedUvIndex > 7.9 && predictedUvIndex <= 10.9) {
+                        predictionContainer.style.background = 'red';
+                    } else if (predictedUvIndex > 10.9) {
+                        predictionContainer.style.background = 'purple';
+                    }
+                } else {
+                    predictedUvIndexElement.textContent = 'No se pudo predecir el índice UV';
+                }
+            } catch (error) {
+                console.error('Error al predecir el índice UV:', error);
+                document.getElementById('predictedUvIndex').textContent = 'Error al predecir el índice UV';
+            }
+        }
+
+        async function fetchLatestValues() {
+            try {
+                const response = await fetch('/get_last_ten_values');
+                const data = await response.json();
+                const latestValuesList = document.getElementById('latestValuesList');
+                latestValuesList.innerHTML = '';  
+
+                data.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `UV Index: ${item.uv_index}, Sensor Value: ${item.sensor_value}`;
+                    latestValuesList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error al obtener los últimos valores:', error);
+            }
+        }
+
+        document.getElementById('predictionForm').addEventListener('submit', predictUVIndex);
+        setInterval(fetchUVIndex, 1000);  
+        fetchUVIndex();
+        setInterval(fetchLatestValues, 1000); 
+        fetchLatestValues(); 
+    </script>
+</body>
+</html>

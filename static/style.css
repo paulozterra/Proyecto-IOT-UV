@@ -1,0 +1,84 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background-color: #ffffff;
+    margin: 0;
+}
+
+.container {
+    width: 60%;
+    max-width: 1200px;
+    padding: 20px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    background-color: #ada9a9;
+}
+
+.large-container {
+    height: 70vh;  
+}
+.predicted-uv-index{
+    color:white;
+    font-weight: bold;
+}
+#temp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.uv-index, .sensor-value {
+    font-size: 48px;
+    margin: 20px 0;
+    color: white;
+}
+
+.status {
+    font-size: 24px;
+    color: white;
+}
+
+h1 {
+    color: white;
+}
+h2 {
+    color: white;
+}
+ul#latestValuesList {
+    list-style-type: none;
+    padding: 0;
+    color: white;
+
+}
+
+ul#latestValuesList li {
+    margin-bottom: 5px;
+    color: white;
+
+}
+#predictedUvIndex {
+    font-size: 1.5em;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.uv-message{
+    color:white;
+    font-size: 20px;
+
+}
+#uvLevel {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+.sensor-value{
+    font-size: 30px;
+}
