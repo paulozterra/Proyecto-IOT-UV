@@ -56,9 +56,7 @@ La arquitectura del proyecto sigue un enfoque por capas:
 
 ## Pasos necesarios para poder ejecutar su aplicación
 
-## Pasos para ejecutar el proyecto
-
-### 1. Configurar componentes IoT
+1. **Configurar componentes IoT**
 - Conectar el **sensor GUVA-S12SD** al pin 34 del ESP32 para medir radiación UV.
 - Conectar el **Display OLED SSD1306** a los pines I2C del ESP32 para mostrar las lecturas.
 - Conectar el ESP32 a la red Wi-Fi usando las siguientes credenciales:
@@ -74,15 +72,15 @@ La arquitectura del proyecto sigue un enfoque por capas:
     const char* serverName = "http://192.168.12.150:5000/save_sensor_data";
   ```
 
-### 2. Cargar el código en el ESP32
+2. **Cargar el código en el ESP32**
   Abrir ArduinoProyecto.cpp en el IDE de Arduino y carga el código en el ESP32.
   Asegúrarse de tener instaladas las bibliotecas (Adafruit_GFX, Adafruit_SSD1306, WiFi, HTTPClient).
 
-### 3. Configurar la base de datos PostgreSQL
+3. **Configurar la base de datos PostgreSQL**
 
   Ejecutar el script TablasPosgreSQL.sql para crear las tablas necesarias en PostgreSQL e inicializar los datos desde     uv_index_lima.csv.
 
-### 4. Ejecutar la aplicación Flask
+4. **Ejecutar la aplicación Flask**
 
  - Instalar las dependencias (Flask y SQLAlchemy).
  - Verificar que la URI de la base de datos en app.py sea correcta:
