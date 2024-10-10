@@ -96,10 +96,6 @@ La arquitectura del proyecto sigue un enfoque por capas:
     ```bash
         python app.py
     ```
-### 5. Modelo de predicción
-
-  Los archivos uv_index_model.pkl y scaler.pkl estén en la misma carpeta que app.py para realizar las predicciones de índice UV.
-
    
 ## Tópicos de Cloud
 
