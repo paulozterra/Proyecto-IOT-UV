@@ -54,7 +54,7 @@ La arquitectura del proyecto sigue un enfoque por capas:
 
 ![Diagrama de arquitectura](Arquitectura.svg)
 
-## Pasos necesarios para poder ejecutar su aplicación
+## Pasos necesarios para poder ejecutar la aplicación
 
 1. **Configurar componentes IoT**
 - Conectar el **sensor GUVA-S12SD** al pin 34 del ESP32 para medir radiación UV.
@@ -78,7 +78,7 @@ La arquitectura del proyecto sigue un enfoque por capas:
 
 3. **Configurar la base de datos PostgreSQL**
 
-  Ejecutar el script TablasPosgreSQL.sql para crear las tablas necesarias en PostgreSQL e inicializar los datos desde     uv_index_lima.csv.
+    Ejecutar el script TablasPosgreSQL.sql para crear las tablas necesarias en PostgreSQL e inicializar los datos desde     uv_index_lima.csv.
 
 4. **Ejecutar la aplicación Flask**
 
