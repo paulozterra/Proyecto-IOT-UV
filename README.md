@@ -74,7 +74,7 @@ La arquitectura del proyecto sigue un enfoque por capas:
 
 2. **Cargar el código en el ESP32**
   Abrir ArduinoProyecto.cpp en el IDE de Arduino y carga el código en el ESP32.
-  Asegúrarse de tener instaladas las bibliotecas (Adafruit_GFX, Adafruit_SSD1306, WiFi, HTTPClient).
+  Instalar las bibliotecas (Adafruit_GFX, Adafruit_SSD1306, WiFi, HTTPClient).
 
 3. **Configurar la base de datos PostgreSQL**
 
