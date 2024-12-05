@@ -1,3 +1,103 @@
+
+# Proyecto: Pipeline ETL en Streaming para Datos de Radiación Ultravioleta utilizando Google Cloud Platform
+
+## Integrantes del Grupo
+- Cuaresma Puclla Paulo Oshualdo
+- Carhuancho Espejo Eros Joaquin
+
+## Resumen del Proyecto
+
+El proyecto consiste en la creación de un pipeline ETL (Extract, Transform, Load) en streaming para procesar datos de radiación ultravioleta en tiempo real. Los datos se obtienen a través de un sensor de radiación UV o, en su defecto, mediante una API que proporciona datos en streaming. El pipeline procesa estos datos en varias etapas, aplicando transformaciones y almacenándolos en diferentes capas dentro de una arquitectura lakehouse.
+
+El objetivo principal del proyecto es asegurar la calidad de los datos desde su captura hasta su almacenamiento final, utilizando tecnologías de Google Cloud Platform como Pub/Sub, Dataflow y BigQuery. Aunque el alcance actual del proyecto se limita al desarrollo del pipeline ETL, se prevé que los datos procesados puedan ser utilizados para análisis avanzados y la creación de modelos predictivos en el futuro. Este pipeline será capaz de alimentar aplicaciones que proporcionen recomendaciones a los usuarios sobre las medidas de protección que deben tomar según los niveles de radiación UV detectados.
+
+
+
+## Funcionalidades, características y arquitectura
+
+### Funcionalidades principales
+
+- **Ingesta de datos IoT en tiempo real**:  
+  El pipeline captura datos de radiación ultravioleta desde un sensor IoT o mediante una API en tiempo real utilizando Google Cloud Pub/Sub. Esto asegura que los datos estén disponibles de forma continua para su procesamiento.
+
+- **Transformación y enriquecimiento de datos**:  
+  Los datos se procesan en Google Cloud Dataflow (Apache Beam), donde se validan, limpian y enriquecen. Se eliminan datos corruptos y se calculan métricas clave como promedios o picos de radiación en ventanas de tiempo.
+
+- **Almacenamiento en capas (raw, enriched, curated)**:  
+  Se sigue un enfoque lakehouse para almacenar los datos en tres capas:
+  - **Raw**: Almacenamiento en Google Cloud Storage de los datos sin procesar, organizados por fecha.
+  - **Enriched**: Datos enriquecidos, listos para análisis, almacenados en BigQuery.
+  - **Curated**: Datos finales depurados, optimizados para consultas rápidas en BigQuery.
+
+- **Escalabilidad**:  
+  El pipeline se adapta automáticamente al volumen de datos, utilizando el autoescalado de Google Cloud Dataflow.
+
+- **Monitoreo y alertas**:  
+  Se utilizan Google Cloud Monitoring y Logging para generar alertas en caso de fallos o retrasos en el pipeline.
+
+
+### Arquitectura
+
+La arquitectura del proyecto sigue un enfoque por capas:
+
+1. **Ingesta**:  
+   - **Pub/Sub**: Captura de datos en tiempo real desde sensores IoT o APIs externas.
+
+2. **Procesamiento**:  
+   - **Dataflow (Apache Beam)**: Limpieza, transformación y enriquecimiento de los datos antes de su almacenamiento.
+
+3. **Almacenamiento**:  
+   - **Cloud Storage (Capa Raw)**: Almacena los datos sin procesar.
+   - **BigQuery (Capas Enriched y Curated)**: Almacena los datos transformados y depurados para análisis.
+
+4. **Monitoreo y alertas**:  
+   - **Cloud Monitoring & Logging**: Supervisa el rendimiento y la salud del pipeline, configurando alertas en caso de fallos.
+
+![Diagrama de arquitectura](Arquitectura.svg)
+
+## Pasos necesarios para poder ejecutar la aplicación en un entorno IOT
+
+1. **Configurar componentes IoT**
+- Conectar el **sensor GUVA-S12SD** al pin 34 del ESP32 para medir radiación UV.
+- Conectar el **Display OLED SSD1306** a los pines I2C del ESP32 para mostrar las lecturas.
+- Conectar el ESP32 a la red Wi-Fi usando las siguientes credenciales:
+  
+  ```cpp
+  const char* ssid = "Nokia"; //nombre de la red
+  const char* password = "paulo123"; // contraseña de la red
+  ```
+    Los datos del sensor se envían al servidor Flask en la dirección:
+
+  ```cpp
+
+    const char* serverName = "http://192.168.12.150:5000/save_sensor_data";
+  ```
+
+2. **Cargar el código en el ESP32**
+  Abrir ArduinoProyecto.cpp en el IDE de Arduino y carga el código en el ESP32.
+  Instalar las bibliotecas (Adafruit_GFX, Adafruit_SSD1306, WiFi, HTTPClient).
+
+3. **Configurar la base de datos PostgreSQL**
+
+    Ejecutar el script TablasPosgreSQL.sql para crear las tablas necesarias en PostgreSQL e inicializar los datos desde     uv_index_lima.csv.
+
+4. **Ejecutar la aplicación Flask**
+
+ - Instalar las dependencias (Flask y SQLAlchemy).
+ - Verificar que la URI de la base de datos en app.py sea correcta:
+   
+   ```python
+     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost:5432/IOT'
+    ```
+
+ - Ejecutar la aplicación Flask con:
+
+    ```bash
+        python app.py
+    ```
+
+## Pasos necesarios para poder ejecutar la aplicación en un entorno cloud
+
 # Generación de Datos Simulados para Sensor de Radiación UV
 
 Este script genera datos simulados de un sensor de radiación ultravioleta (UV) y los publica en un tópico de **Pub/Sub** de Google Cloud. Es utilizado como parte de una demostración para simular datos en tiempo real.
@@ -177,104 +277,72 @@ python uv_dataflow_pipeline_manual.py \
 2. **Configuración Automática vs Manual**:
    - Usa el pipeline estándar para configuraciones predeterminadas y despliegues rápidos.
    - Opta por el pipeline manual si necesitas personalizar recursos o optimizar costos.
-=======
-# Proyecto: Pipeline ETL en Streaming para Datos de Radiación Ultravioleta utilizando Google Cloud Platform
+## Creación de una Alerta en Base a una Métrica Basada en Registros
 
-## Integrantes del Grupo
-- Cuaresma Puclla Paulo Oshualdo
-- Carhuancho Espejo Eros Joaquin
+### Nombre de la Alerta
+**Alerta de Fallo de Trabajo en Dataflow**
 
-## Resumen del Proyecto
+### Descripción
+Esta alerta se activa cuando un trabajo de Dataflow falla. Utiliza una métrica personalizada basada en registros que filtra entradas específicas de errores relacionados con fallos en los workflows de Dataflow.
 
-El proyecto consiste en la creación de un pipeline ETL (Extract, Transform, Load) en streaming para procesar datos de radiación ultravioleta en tiempo real. Los datos se obtienen a través de un sensor de radiación UV o, en su defecto, mediante una API que proporciona datos en streaming. El pipeline procesa estos datos en varias etapas, aplicando transformaciones y almacenándolos en diferentes capas dentro de una arquitectura lakehouse.
+### Configuración de la Métrica Basada en Registros
 
-El objetivo principal del proyecto es asegurar la calidad de los datos desde su captura hasta su almacenamiento final, utilizando tecnologías de Google Cloud Platform como Pub/Sub, Dataflow y BigQuery. Aunque el alcance actual del proyecto se limita al desarrollo del pipeline ETL, se prevé que los datos procesados puedan ser utilizados para análisis avanzados y la creación de modelos predictivos en el futuro. Este pipeline será capaz de alimentar aplicaciones que proporcionen recomendaciones a los usuarios sobre las medidas de protección que deben tomar según los niveles de radiación UV detectados.
+1. **Tipo de Métrica**: `Counter`
+   - Cuenta la cantidad de entradas de registro que coinciden con el filtro.
 
+2. **Nombre de la Métrica**: `dataflow_failed_jobs`
 
+3. **Filtro de Registros**:
+severity="ERROR" AND textPayload:"Workflow failed. Causes:"
 
-## Funcionalidades, características y arquitectura
+Este filtro identifica registros con errores (`severity="ERROR"`) y mensajes que contienen "Workflow failed. Causes:" en su `textPayload`.
 
-### Funcionalidades principales
+4. **Etiquetas**:
+- **Nombre**: `job_id`
+- **Tipo**: `STRING`
+- **Nombre del Campo**: `labels."dataflow.googleapis.com/job_id"`
 
-- **Ingesta de datos IoT en tiempo real**:  
-  El pipeline captura datos de radiación ultravioleta desde un sensor IoT o mediante una API en tiempo real utilizando Google Cloud Pub/Sub. Esto asegura que los datos estén disponibles de forma continua para su procesamiento.
+5. **Unidades**: `1`
 
-- **Transformación y enriquecimiento de datos**:  
-  Los datos se procesan en Google Cloud Dataflow (Apache Beam), donde se validan, limpian y enriquecen. Se eliminan datos corruptos y se calculan métricas clave como promedios o picos de radiación en ventanas de tiempo.
+6. **Selección de Proyecto**:
+- Asegúrate de seleccionar el proyecto correcto donde se generan los registros.
 
-- **Almacenamiento en capas (raw, enriched, curated)**:  
-  Se sigue un enfoque lakehouse para almacenar los datos en tres capas:
-  - **Raw**: Almacenamiento en Google Cloud Storage de los datos sin procesar, organizados por fecha.
-  - **Enriched**: Datos enriquecidos, listos para análisis, almacenados en BigQuery.
-  - **Curated**: Datos finales depurados, optimizados para consultas rápidas en BigQuery.
+---
 
-- **Escalabilidad**:  
-  El pipeline se adapta automáticamente al volumen de datos, utilizando el autoescalado de Google Cloud Dataflow.
+### Creación de la Alerta
 
-- **Monitoreo y alertas**:  
-  Se utilizan Google Cloud Monitoring y Logging para generar alertas en caso de fallos o retrasos en el pipeline.
+1. **Accede a Cloud Monitoring**:
+- Ve a [Google Cloud Monitoring](https://console.cloud.google.com/monitoring).
 
+2. **Crea una Política de Alerta**:
+- Selecciona "Alertas" en el menú lateral.
+- Haz clic en "Crear política de alerta".
 
-### Arquitectura
+3. **Agrega una Condición**:
+- Haz clic en "Agregar condición".
+- Selecciona la métrica personalizada `dataflow_failed_jobs`.
+- Configura la condición para activarse cuando el valor de la métrica sea mayor que `0` en un intervalo de tiempo.
 
-La arquitectura del proyecto sigue un enfoque por capas:
-
-1. **Ingesta**:  
-   - **Pub/Sub**: Captura de datos en tiempo real desde sensores IoT o APIs externas.
-
-2. **Procesamiento**:  
-   - **Dataflow (Apache Beam)**: Limpieza, transformación y enriquecimiento de los datos antes de su almacenamiento.
-
-3. **Almacenamiento**:  
-   - **Cloud Storage (Capa Raw)**: Almacena los datos sin procesar.
-   - **BigQuery (Capas Enriched y Curated)**: Almacena los datos transformados y depurados para análisis.
-
-4. **Monitoreo y alertas**:  
-   - **Cloud Monitoring & Logging**: Supervisa el rendimiento y la salud del pipeline, configurando alertas en caso de fallos.
-
-![Diagrama de arquitectura](Arquitectura.svg)
-
-## Pasos necesarios para poder ejecutar la aplicación
-
-1. **Configurar componentes IoT**
-- Conectar el **sensor GUVA-S12SD** al pin 34 del ESP32 para medir radiación UV.
-- Conectar el **Display OLED SSD1306** a los pines I2C del ESP32 para mostrar las lecturas.
-- Conectar el ESP32 a la red Wi-Fi usando las siguientes credenciales:
-  
-  ```cpp
-  const char* ssid = "Nokia"; //nombre de la red
-  const char* password = "paulo123"; // contraseña de la red
+4. **Configura Notificaciones**:
+- Agrega un canal de notificación (correo electrónico, SMS, etc.).
+- El mensaje de la alerta puede ser:
   ```
-    Los datos del sensor se envían al servidor Flask en la dirección:
-
-  ```cpp
-
-    const char* serverName = "http://192.168.12.150:5000/save_sensor_data";
+  Un job de Dataflow ha fallado. Job ID: ${metric.labels.job_id}
+  Consulta el estado completo del job aquí: https://console.cloud.google.com/dataflow/jobs/us-central1/${metric.labels.job_id}
   ```
 
-2. **Cargar el código en el ESP32**
-  Abrir ArduinoProyecto.cpp en el IDE de Arduino y carga el código en el ESP32.
-  Instalar las bibliotecas (Adafruit_GFX, Adafruit_SSD1306, WiFi, HTTPClient).
+5. **Guarda la Política**:
+- Asigna un nombre a la política, como "Alerta de Fallo de Trabajo en Dataflow".
+- Revisa los detalles y guarda la política.
 
-3. **Configurar la base de datos PostgreSQL**
+---
 
-    Ejecutar el script TablasPosgreSQL.sql para crear las tablas necesarias en PostgreSQL e inicializar los datos desde     uv_index_lima.csv.
+### Notas Importantes
 
-4. **Ejecutar la aplicación Flask**
+- **Pruebas**: Después de configurar la alerta, verifica su funcionamiento generando un fallo en un job de Dataflow de prueba.
+- **Escalabilidad**: Esta configuración se puede aplicar a otros servicios de Google Cloud si se personalizan los filtros de los registros.
 
- - Instalar las dependencias (Flask y SQLAlchemy).
- - Verificar que la URI de la base de datos en app.py sea correcta:
-   
-   ```python
-     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost:5432/IOT'
-    ```
 
- - Ejecutar la aplicación Flask con:
-
-    ```bash
-        python app.py
-    ```
-   
 ## Tópicos de Cloud
 
 ### Tópico 1: Procesamiento en tiempo real con Dataflow
@@ -288,4 +356,4 @@ Cloud Monitoring y Logging ofrecen visibilidad en tiempo real sobre el rendimien
 ## Referencias
 
 - [Building the analytics lakehouse on Google Cloud ](https://services.google.com/fh/files/emails/google-cloud-analytics-lakehouse_.pdf?utm_source=cgc-blog&utm_medium=blog&utm_campaign=NA&utm_content=blog-referral&utm_term=-)
->>>>>>> b3a888523d08cd1f4ae09e9d65ac7d9635805de0
+
