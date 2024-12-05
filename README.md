@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Generación de Datos Simulados para Sensor de Radiación UV
 
 Este script genera datos simulados de un sensor de radiación ultravioleta (UV) y los publica en un tópico de **Pub/Sub** de Google Cloud. Es utilizado como parte de una demostración para simular datos en tiempo real.
